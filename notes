@@ -1,0 +1,82 @@
+static void init_lcm_registers(void)
+{
+	unsigned int data_array[16];
+	
+	// Here 0x15 is Used Because There is Only One Config (0x80) Which is Used To Set Mode...
+	// 0x00 On The Right Hand Of 0x80 Represents That This Array is Used To Change Mode...
+	data_array[0] = 0x80001500;
+	dsi_set_cmdq(&data_array, 1, 1); //The Second Parameter "1" Represents The Number Of Arrays Which is Only 1 ( data_array[0] )
+
+	// Here, 0x39 Represents The Number Of Configs Are Greater Than 1
+	// And 0x09 (in HexaDecimal Form) Represents That The Number Of Configs Are 9
+	// Did You Noticed That in Previous Two Examples i Said The Number Of Configs Are 8 ?
+	// The Reason is, in This Type Of LCM Configs, We Count Register As a Config,
+	// So This Way Number Of Configs + Number Of Register Becomes 9 (8+1 = 9)
+	data_array[0] = 0x00093902;
+	data_array[1] = 0x020100C0; //Here, 0xC0 is The Register, And All Other Values Next To it Are The Configs
+	data_array[2] = 0x0c0b0a03;
+	data_array[3] = 0x000000ff;
+	dsi_set_cmdq(&data_array, 4, 1); // Here, 4 (in Decimal Form) Represents The Number Of Arrays, Which is 4 ( data_array[0], data_array[1], data_array[2], data_array[3] )
+
+
+	data_array[0] = 0x90001500;
+	dsi_set_cmdq(&data_array, 1, 1);
+
+	data_array[0] = 0x00073902;
+	data_array[1] = 0x020100C1;
+	data_array[2] = 0x000c0b0a;
+	dsi_set_cmdq(&data_array, 3, 1);
+}
+
+--
+
+// if You See Other Similar Name LCM Drivers Have Mode Changing Configs, Then You Must Have To Set The Mode Whose Register You Want To ReadBack...
+ array[0] = 0x00063700;  // Here, "37" Sets The ReadBack Mode, And "06" Means, Return 6 Values...
+ dsi_set_cmdq(&array, 1, 1);
+	
+ read_reg_v2(0xC1, buffer, 6);  // Here, 0xC1 is The Register Which We Want To ReadBack, And "6" is The Buffer Size To Store Returned Values
+ id1 = buffer[0]; 
+ id2 = buffer[1];
+ id3 = buffer[2];
+ id4 = buffer[3];
+ id5 = buffer[4];
+ id6 = buffer[5];
+ printk("Reg=C1 HexValues= {0x%02x, 0x%02x, 0x%02x, 0x%02x 0x%02x, 0x%02x} \n", id1, id2, id3, id4, id5, id6);
+
+ // Now it Will Print Those Values in Kmsg Logs, Which Were Returned From 0xC1 Register
+ // Assuming The Code Shown in Above Three Examples is The Proper Working Code From Official LCM Driver Source
+ // The Values Shown in The Kmsg Logs Should Be ==> Reg=C1 HexValues= {0x00, 0x01, 0x02, 0x0a, 0x0b, 0x0c}
+
+--
+
+//Now We Want To Read The Values Of The Register We Know... So That We Can Use Those Values in Our LCM Driver Later...
+	data_array[0] = 0x90001500; //First We Need To Set The Mode 90 (Which We Already Know), Whose Register We Want To ReadBack
+	dsi_set_cmdq(&data_array, 1, 1); //Set Mode Command Sent...
+	
+	//data_array[0] = 0x00073902; //Here We Disabled The Array Because We Don't Know About Values At This Point
+	//data_array[1] = 0x020100C1; //Here We Disabled The Array Because We Don't Know About Values At This Point
+	//data_array[2] = 0x000c0b0a; //Here We Disabled The Array Because We Don't Know About Values At This Point
+	//dsi_set_cmdq(&data_array, 3, 1); //Here We Disabled The Send Command Because We Don't Have Any Arrays...
+	
+	array[0] = 0x00063700;  // Here, "37" Sets The ReadBack Mode (Which is Comman in All LCM Drivers), And "06" Means, Return 6 Values...
+ 	dsi_set_cmdq(&array, 1, 1); //ReadBack Command Sent
+	
+	// Here We Set 0xC1 Register (Which We Already Know) We Want To ReadBack...
+	// "6" is The Buffer Size To Store Returned Values, We Know This "6" Because The Number Of Values A Register Can Store is The Number Of Values We Should Read...
+ 	read_reg_v2(0xC1, buffer, 6);
+ 	id1 = buffer[0]; 
+ 	id2 = buffer[1];
+ 	id3 = buffer[2];
+ 	id4 = buffer[3];
+ 	id5 = buffer[4];
+ 	id6 = buffer[5];
+ 	printk("Reg=C1 HexValues= {0x%02x, 0x%02x, 0x%02x, 0x%02x 0x%02x, 0x%02x} \n", id1, id2, id3, id4, id5, id6);
+	
+	// Finally, it Will Print Those Values in Kmsg Logs, Which Were Loaded into 0xC1 Register From Uboot/LK On First Bootup...
+	// Now Suppose if The Returned Values Are These ==> Reg=C1 HexValues= {0x00, 0x01, 0x02, 0x0a, 0x0b, 0x0c}
+	// Then We Can Use These Configs To Make Arrays...
+	// And The Arrays Should Look Like This...
+	data_array[0] = 0x00073902;
+	data_array[1] = 0x020100C1;
+	data_array[2] = 0x000c0b0a;
+	dsi_set_cmdq(&data_array, 3, 1);
