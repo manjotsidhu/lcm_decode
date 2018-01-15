@@ -388,34 +388,34 @@ static unsigned int lcm_compare_id(void)
 
 }
 
-static unsigned int lcm_esd_check(void)
-{
-  #ifndef BUILD_LK
-  char  buffer[3];
-  int   array[16];
-
-  if(lcm_esd_test)
-  {
-    lcm_esd_test = FALSE;
-    return TRUE;
-  }
-
-
-  array[0] = 0x00013700;
-  dsi_set_cmdq(array, 1, 1);
-
-  read_reg_v2(0x0A, buffer, 1);
-  if(buffer[0]==0x1c)
-  {
-    return FALSE;
-  }
-  else
-  {
-    return TRUE;
-  }
- #endif
-
-}
+//static unsigned int lcm_esd_check(void)
+//{
+//  #ifndef BUILD_LK
+//  char  buffer[3];
+//  int   array[16];
+//
+//  if(lcm_esd_test)
+//  {
+//    lcm_esd_test = FALSE;
+//    return TRUE;
+//  }
+//
+//
+//  array[0] = 0x00013700;
+//  dsi_set_cmdq(array, 1, 1);
+//
+//  read_reg_v2(0x0A, buffer, 1);
+//  if(buffer[0]==0x1c)
+//  {
+//    return FALSE;
+//  }
+//  else
+//  {
+//    return TRUE;
+//  }
+// #endif
+//
+//}
 
 static unsigned int lcm_esd_recover(void)
 {
